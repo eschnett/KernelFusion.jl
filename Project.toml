@@ -1,0 +1,10 @@
+name = "KernelFusion"
+uuid = "889bacb3-05b7-4ec9-a7d6-bfd61b124d36"
+authors = ["Erik Schnetter <schnetter@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
+InteractiveUtils = "b77e0a4c-d291-57a0-90e8-8db25a27a240"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
