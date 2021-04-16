@@ -27,9 +27,6 @@ end
 
 times2(params, x) = params.factor * x
 
-export make_kernel
-make_kernel(expr::Expr) = eval(expr)
-
 export run_kernel!
 function run_kernel!(kernel, params, A::Array{T,2}) where {T}
     return map!(x -> kernel(params, x), A, A)

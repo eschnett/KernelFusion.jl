@@ -1,9 +1,13 @@
+module KernelFusionExamples
+
 using ForwardDiff
 using InteractiveUtils
 using KernelFusion
 using StaticArrays
 
-function simple_kernel()
+################################################################################
+
+function make_simple_kernel()
     # Define some code. The result of a `quote` is a Julia expression. We could read JSON instead.
     code = quote
         add1(x) = x + 1
@@ -12,6 +16,10 @@ function simple_kernel()
     # This creates actual Julia code from Julia expressions. It's not compiled yet; that only happens when the kernel is called.
     kernel = make_kernel(code)
 
+    return kernel
+end
+
+function run_simple_kernel(kernel)
     # Define a 2d array
     npoints = 3
     A = Float32[i + 100j for i in 1:npoints, j in 1:npoints]
@@ -26,7 +34,9 @@ function simple_kernel()
     # show_kernel_code(kernel, B)
 end
 
-function parameterized_kernel()
+################################################################################
+
+function make_parameterized_kernel()
     code = quote
         function (params, x)
             add1(x) = x + params.offset
@@ -36,6 +46,10 @@ function parameterized_kernel()
     end
     kernel = make_kernel(code)
 
+    return kernel
+end
+
+function run_parameterized_kernel(kernel)
     npoints = 3
     A = Float32[i + 100j for i in 1:npoints, j in 1:npoints]
     B = copy(A)
@@ -45,10 +59,12 @@ function parameterized_kernel()
 
     @assert B == max.(300, 2 .* A) .+ 1
 
-    # show_kernel_code(kernel, params, B)
+    show_kernel_code(kernel, params, B)
 end
 
-function kernel_derivative()
+################################################################################
+
+function make_kernel_derivative()
     code = quote
         function (params, x)
             add1(x) = x + params.offset
@@ -60,6 +76,10 @@ function kernel_derivative()
     end
     kernel = make_kernel(code)
 
+    return kernel
+end
+
+function run_kernel_derivative(kernel)
     npoints = 3
     A = Float32[i + 100j for i in 1:npoints, j in 1:npoints]
     params = (factor=2, offset=1)
@@ -85,6 +105,6 @@ function kernel_derivative()
     δ = 0.001
     # @show grad(cost, params′, δ)
     @assert grad_cost(params′) ≈ grad(cost, params′, δ)
+end
 
-    # show_kernel_code(kernel, params, B)
 end
