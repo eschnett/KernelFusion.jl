@@ -152,20 +152,18 @@ function run()
     good_intensities = copy(intensities)
     good_weights = copy(weights)
 
-    intensities = copy(intensities0)
-    weights = copy(weights0)
+    copy!(intensities, intensities0)
+    copy!(weights, weights0)
     process_fast!(intensities, weights)
     @assert intensities ≈ good_intensities
     @assert weights ≈ good_weights
 
-    intensities = copy(intensities0)
-    weights = copy(weights0)
+    copy!(intensities, intensities0)
+    copy!(weights, weights0)
     process_fast2!(intensities, weights)
     @assert intensities ≈ good_intensities
     @assert weights ≈ good_weights
 
-    intensities = copy(intensities0)
-    weights = copy(weights0)
     display(@benchmark process!($intensities, $weights) setup = (copy!($intensities,
                                                                        $intensities0);
                                                                  copy!($weights,
