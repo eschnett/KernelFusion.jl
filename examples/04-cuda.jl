@@ -2,6 +2,7 @@
 
 module Cuda
 
+using BenchmarkTools
 using CUDA
 using KernelFusion
 
