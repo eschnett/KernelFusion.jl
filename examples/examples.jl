@@ -59,7 +59,7 @@ function run_parameterized_kernel(kernel)
 
     @assert B == max.(300, 2 .* A) .+ 1
 
-    show_kernel_code(kernel, params, B)
+    # show_kernel_code(kernel, params, B)
 end
 
 ################################################################################
