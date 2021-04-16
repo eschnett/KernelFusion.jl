@@ -109,12 +109,60 @@ function process_fast!(intensities::AbstractArray{T,2},
     return nothing
 end
 
+function process_fast2!(intensities::AbstractArray{T,2},
+                        weights::AbstractArray{T,2}) where {T<:Number}
+    @assert size(intensities) == size(weights)
+    ntimes, nfreqs = size(intensities)
+
+    @inbounds for freq in 1:nfreqs
+        for iter in 1:niters
+            sumw = zero(T)
+            sumi = zero(T)
+            sumi2 = zero(T)
+            @simd for time in 1:ntimes
+                sumw += weights[time, freq]
+                sumi += weights[time, freq] * intensities[time, freq]
+                sumi2 += weights[time, freq] * intensities[time, freq]^2
+            end
+            avgi = sumi / sumw
+            sdvi = sqrt(max(0, sumi2 / sumw - avgi^2))
+
+            @simd for time in 1:ntimes
+                intensities[time, freq] -= avgi
+                if abs(intensities[time, freq]) ≥ S * sdvi
+                    weights[time, freq] = 0
+                end
+            end
+        end
+    end
+
+    return nothing
+end
+
 function run()
     T = Float32
     ntimes = 4096
     nfreqs = 4096
     intensities0 = randn(T, ntimes, nfreqs)
     weights0 = clamp.(randn(T, ntimes, nfreqs) .+ 1, 0, 1)
+
+    intensities = copy(intensities0)
+    weights = copy(weights0)
+    process!(intensities, weights)
+    good_intensities = copy(intensities)
+    good_weights = copy(weights)
+
+    intensities = copy(intensities0)
+    weights = copy(weights0)
+    process_fast!(intensities, weights)
+    @assert intensities ≈ good_intensities
+    @assert weights ≈ good_weights
+
+    intensities = copy(intensities0)
+    weights = copy(weights0)
+    process_fast2!(intensities, weights)
+    @assert intensities ≈ good_intensities
+    @assert weights ≈ good_weights
 
     intensities = copy(intensities0)
     weights = copy(weights0)
@@ -126,6 +174,10 @@ function run()
                                                                             $intensities0);
                                                                       copy!($weights,
                                                                             $weights0)))
+    display(@benchmark process_fast2!($intensities, $weights) setup = (copy!($intensities,
+                                                                             $intensities0);
+                                                                       copy!($weights,
+                                                                             $weights0)))
     println("Memory accesses: ", 2 * (sizeof(intensities) + sizeof(weights)),
             " Bytes")
 
