@@ -19,15 +19,15 @@ function detrend!(intensities::AbstractArray{T,2},
     freq = blockIdx().x + 1
     time = threadIdx().x + 1
 
-    wtmp = @cuStaticSharedMem(T, ntimes)
-    itmp = @cuStaticSharedMem(T, ntimes)
+    wtmp = @cuDynamicSharedMem(T, ntimes)
+    itmp = @cuDynamicSharedMem(T, ntimes)
     w = weights[time, freq]
     i = intensities[time, freq]
     wtmp[time] = w
     itmp[time] = i
 
-    sumwtmp = @cuStaticSharedMem(T, ntimes)
-    sumitmp = @cuStaticSharedMem(T, ntimes)
+    sumwtmp = @cuDynamicSharedMem(T, ntimes)
+    sumitmp = @cuDynamicSharedMem(T, ntimes)
     sumwtmp[time] = w
     sumitmp[time] = w * i^2
     CUDA.sync_threads()
