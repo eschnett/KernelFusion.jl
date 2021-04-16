@@ -30,7 +30,7 @@ function run_simple_kernel(kernel)
     run_kernel!(kernel, B)
 
     # Check the result
-    @assert B == max.(300, 2 .* A) .+ 1
+    @assert Array(B) == max.(300, 2 .* A) .+ 1
 
     # show_kernel_code(kernel, B)
 end
@@ -58,7 +58,7 @@ function run_parameterized_kernel(kernel)
     params = (factor=2, offset=1)
     run_kernel!(kernel, params, B)
 
-    @assert B == max.(300, 2 .* A) .+ 1
+    @assert Array(B) == max.(300, 2 .* A) .+ 1
 
     # show_kernel_code(kernel, params, B)
 end
