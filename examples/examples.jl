@@ -3,6 +3,7 @@ module KernelFusionExamples
 using ForwardDiff
 using InteractiveUtils
 using KernelFusion
+using ReverseDiff
 using StaticArrays
 
 ################################################################################
@@ -95,6 +96,34 @@ function run_kernel_derivative(kernel)
     # @show cost(params′)
 
     grad_cost = params′ -> ForwardDiff.gradient(cost, params′)
+    # @show grad_cost(params′)
+    # Calculate gradient via finite differences
+    function grad(f, x, δ)
+        return SVector{2,Float32}((f(x + [(j == i) * δ for j in 1:length(x)]) -
+                                   f(x - [(j == i) * δ for j in 1:length(x)])) /
+                                  2δ for i in 1:length(x))
+    end
+    δ = 0.001
+    # @show grad(cost, params′, δ)
+    @assert grad_cost(params′) ≈ grad(cost, params′, δ)
+end
+
+function run_kernel_derivative_reverse(kernel)
+    npoints = 3
+    A = Float32[i + 100j for i in 1:npoints, j in 1:npoints]
+    params = (factor=2, offset=1)
+
+    function cost(params′)
+        params = (factor=params′[1], offset=params′[2])
+        B1 = kernel(params, A[1])
+        B = typeof(B1).(copy(A))
+        run_kernel!(kernel, params, B)
+        return sum((B .- 400) .^ 2)
+    end
+    params′ = SVector{2,Float32}(params.factor, params.offset)
+    # @show cost(params′)
+
+    grad_cost = params′ -> ReverseDiff.gradient(cost, params′)
     # @show grad_cost(params′)
     # Calculate gradient via finite differences
     function grad(f, x, δ)
