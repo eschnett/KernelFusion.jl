@@ -36,10 +36,13 @@ function run(kernel)
     @assert Array(B) == max.(300, 2 .* A) .+ 1
     println("Test: Success")
 
-    display(@benchmark CUDA.@sync run_kernel!($kernel, $params, B) setup = (B = copy($A)))
+    display(@benchmark (CUDA.@sync run_kernel!($kernel, $params, B)) setup = (B = CuArray($A)))
     println("Memory accesses: ", 2 * sizeof(A), " Bytes")
 
-    # show_kernel_code(kernel, params, B)
+    # @device_code_warntype run_kernel!(kernel, params, B)
+    # @device_code_llvm run_kernel!(kernel, params, B)
+    # @device_code_ptx run_kernel!(kernel, params, B)
+    # @device_code_sass run_kernel!(kernel, params, B)
 
     return nothing
 end
