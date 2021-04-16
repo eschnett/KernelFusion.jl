@@ -3,7 +3,6 @@
 module Fusion
 
 using BenchmarkTools
-using InteractiveUtils
 using KernelFusion
 
 clamp(x, xlo, xhi) = max(xlo, min(xhi, x))
