@@ -4,6 +4,7 @@ module Fusion
 
 using BenchmarkTools
 using KernelFusion
+using Random
 
 clamp(x, xlo, xhi) = max(xlo, min(xhi, x))
 
@@ -142,12 +143,14 @@ function run()
     T = Float32
     ntimes = 4096
     nfreqs = 4096
+    Random.seed!(0)
     intensities0 = randn(T, ntimes, nfreqs)
     weights0 = clamp.(randn(T, ntimes, nfreqs) .+ 1, 0, 1)
 
     intensities = copy(intensities0)
     weights = copy(weights0)
     process!(intensities, weights)
+    println("sum(intensities)=$(sum(intensities .% 1))   sum(weights)=$(sum(weights))")
     good_intensities = copy(intensities)
     good_weights = copy(weights)
 
