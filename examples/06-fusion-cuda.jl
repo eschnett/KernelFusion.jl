@@ -11,8 +11,8 @@ clamp(x, xlo, xhi) = max(xlo, min(xhi, x))
 const S = 3                     # for clipping
 const niters = 3
 
-function detrend!(intensities::CuArray{T,2},
-                  weights::CuArray{T,2}) where {T<:Number}
+function detrend!(intensities::AbstractGPUArray{T,2},
+                  weights::AbstractGPUArray{T,2}) where {T<:Number}
     # @assert size(intensities) == size(weights)
     ntimes, nfreqs = size(intensities)
 
@@ -51,8 +51,8 @@ function detrend!(intensities::CuArray{T,2},
     return nothing
 end
 
-function clip!(intensities::CuArray{T,2},
-               weights::CuArray{T,2}) where {T<:Number}
+function clip!(intensities::AbstractGPUArray{T,2},
+               weights::AbstractGPUArray{T,2}) where {T<:Number}
     @assert size(intensities) == size(weights)
     ntimes, nfreqs = size(intensities)
 
@@ -78,8 +78,8 @@ function clip!(intensities::CuArray{T,2},
     return nothing
 end
 
-function process!(intensities::CuArray{T,2},
-                  weights::CuArray{T,2}) where {T<:Number}
+function process!(intensities::AbstractGPUArray{T,2},
+                  weights::AbstractGPUArray{T,2}) where {T<:Number}
     for iter in 1:niters
         detrend!(intensities, weights)
         # clip!(intensities, weights)
@@ -96,9 +96,9 @@ function run()
 
     intensities = copy(intensities0)
     weights = copy(weights0)
-    @cuda threads = size(intensities, 2) process!(intensities, weights)
+    @cuda threads = size(intensities, 1) process!(intensities, weights)
 
-    display(@benchmark (CUDA.@sync @cuda threads = size(intensities, 2) process!($intensities,
+    display(@benchmark (CUDA.@sync @cuda threads = size(intensities, 1) process!($intensities,
                                                                                  $weights)) setup = (copy!($intensities,
                                                                                                            $intensities0);
                                                                                                      copy!($weights,
